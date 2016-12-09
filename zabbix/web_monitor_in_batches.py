@@ -3,7 +3,7 @@
 from pyzabbix import ZabbixAPI
 import sys
 
-server_name_in_zabbix = '腾讯云旧主站'
+server_name_in_zabbix = 'my server'
 hostid = 10323  #This is what host you want to add the scenarios
 applicationid = 2672   #This is what application you want to add
 retries = 1
@@ -12,8 +12,8 @@ status = 200
 agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.8 (KHTML, like Gecko) Chrome/17.0.940.0 Safari/535.8'
 
 def auth():
-    zapi = ZabbixAPI("http://zabbix.smm.cn")
-    zapi.login("Yvan", "LaW50n.Y")
+    zapi = ZabbixAPI("http://zabbix url")
+    zapi.login("my username", "my secret")
     return zapi
 
 def get_host_name(login_zabbix):
