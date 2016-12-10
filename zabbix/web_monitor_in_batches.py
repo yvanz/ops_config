@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 from pyzabbix import ZabbixAPI
+from __future__ import print_function
 import sys
 
 server_name_in_zabbix = 'my server'
@@ -48,7 +49,7 @@ def get_url(login_zabbix, host_name):
 def create_web_scenarios(login_zabbix, host_name, monitor_url, name):
     request = login_zabbix.httptest.get(filter={"name": name})
     if request:
-        print ('"%s" is exist' % name)
+        print ('"{}" is exist'.format(name))
         # create_trigger(login_zabbix,host_name,name)
         sys.exit(1)
     else:
@@ -70,12 +71,12 @@ def create_web_scenarios(login_zabbix, host_name, monitor_url, name):
 def create_trigger(login_zabbix, host_name, name):
     # print host_name
     login_zabbix.trigger.create({
-        "description": "%s http code got an exception" % name,
+        "description": "{} http code got an exception".format(name),
         "expression": "{%s:web.test.rspcode[%s,%s index].last()}>400" % (host_name, name, name),
         "priority": "2"
     })
     login_zabbix.trigger.create({
-        "description": "%s response slow now" % name,
+        "description": "{} response slow now".format(name),
         "expression": "{%s:web.test.time[%s,%s index,resp].last()}>5" % (host_name, name, name),
         "priority": "2"
     })
@@ -91,7 +92,7 @@ def main():
     host_name = get_host_name(login_zabbix)
     # host_id = get_host_id(login_zabbix)
     get_url(login_zabbix, host_name)
-    print "Everything is done,please check on your zabbix server"
+    print ("Everything is done,please check on your zabbix server")
 
 if __name__ == '__main__':
     main()
