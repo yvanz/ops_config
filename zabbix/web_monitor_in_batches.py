@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
-from pyzabbix import ZabbixAPI
 from __future__ import print_function
+from pyzabbix import ZabbixAPI
 import sys
 
 server_name_in_zabbix = 'my server'
@@ -37,7 +37,7 @@ def get_url(login_zabbix, host_name):
     with open('~/desktop/smm_web.txt') as f:
         for url in f:
             monitor_url = url
-            name = monitor_url.split('.')[0].split('//')[-1]
+            name = monitor_url.split('//')[-1]
             create_web_scenarios(login_zabbix,monitor_url=monitor_url,name=name)
     '''
     url = 'http://testwww.smm.cn'
@@ -69,7 +69,6 @@ def create_web_scenarios(login_zabbix, host_name, monitor_url, name):
 
 
 def create_trigger(login_zabbix, host_name, name):
-    # print host_name
     login_zabbix.trigger.create({
         "description": "{} http code got an exception".format(name),
         "expression": "{%s:web.test.rspcode[%s,%s index].last()}>400" % (host_name, name, name),
@@ -77,7 +76,7 @@ def create_trigger(login_zabbix, host_name, name):
     })
     login_zabbix.trigger.create({
         "description": "{} response slow now".format(name),
-        "expression": "{%s:web.test.time[%s,%s index,resp].last()}>5" % (host_name, name, name),
+        "expression": "{%s:web.test.time[%s,%s index,resp].count(2m,10,"gt")}>5" % (host_name, name, name),
         "priority": "2"
     })
     login_zabbix.trigger.create({
