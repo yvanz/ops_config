@@ -42,7 +42,7 @@ def get_url(login_zabbix, host_name):
     '''
     url = 'http://testwww.smm.cn'
     monitor_url = url
-    name = monitor_url.split('//')[-1]
+    name = monitor_url.split('//')[-1].split('\n')[0]
     create_web_scenarios(login_zabbix, host_name, monitor_url=monitor_url, name=name)
 
 
@@ -61,7 +61,7 @@ def create_web_scenarios(login_zabbix, host_name, monitor_url, name):
             "delay": delay,
             "retries": retries,
             "steps": [{
-                'name': name.split('.')[0]+' index',
+                'name': name+' index',
                 'url': monitor_url,
                 'status_codes': status,
                 'no': '1'}]
