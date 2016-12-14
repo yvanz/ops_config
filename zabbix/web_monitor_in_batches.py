@@ -55,6 +55,7 @@ def create_web_scenarios(login_zabbix, host_name, monitor_url, name):
             "steps": [{
                 'name': name+' index',
                 'url': monitor_url,
+                'required': 'Copyright',
                 'status_codes': status,
                 'no': '1'}]
         })
@@ -70,6 +71,11 @@ def create_trigger(login_zabbix, host_name, name):
     login_zabbix.trigger.create({
         "description": "{} response slow now".format(name),
         "expression": "{%s:web.test.time[%s,%s index,resp].count(2m,10,"gt")}>5" % (host_name, name, name),
+        "priority": "2"
+    })
+    login_zabbix.trigger.create({
+        "description": "{} seems error".format(name),
+        "expression": "{%s:web.test.error[%s].str(required pattern,3)}=1" % (host_name, name),
         "priority": "2"
     })
 
