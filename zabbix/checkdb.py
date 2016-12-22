@@ -6,7 +6,10 @@ mysql_pw = ''
 mysql_host = ''
 mysql_port = 
 
-with MySQLdb.connect(host = mysql_host, user = mysql_user, passwd = mysql_pw, port = mysql_port) as cursor:
-    monitor_num = cursor.execute(""" select 1 """)
-
-print monitor_num
+try:
+    with MySQLdb.connect(host = mysql_host, user = mysql_user, passwd = mysql_pw, port = mysql_port) as cursor:
+        monitor_num = cursor.execute(""" select 1 """)
+except Exception as e:
+    print 0
+else:
+    print monitor_num
