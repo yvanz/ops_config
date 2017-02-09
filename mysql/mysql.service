@@ -1,0 +1,14 @@
+[Unit]
+Description=Mysqld Server (prefork MPM)
+After=syslog.target network.target
+
+[Service]
+User=mysql
+Group=mysql
+Type=simple
+PIDFile=/data/mysql/data/mysql.pid
+ExecStart=/usr/local/webserver/mysql/bin/mysqld_safe --defaults-file=/etc/my.cnf --ledir=/usr/local/webserver/mysql/bin
+ExecStop=kill -s -QUIT $MAINPID
+
+[Install]
+WantedBy=multi-user.target
