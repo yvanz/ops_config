@@ -1,0 +1,81 @@
+FROM alpine:latest
+
+MAINTAINER Yvan "me@yvanz.com"
+
+RUN apk add --no-cache --virtual .build-deps \
+    gcc \
+    make \
+    libc-dev \
+    zlib-dev \
+    linux-headers \
+    geoip-dev \
+    g++ \
+    perl-dev \
+    && \
+    # 下载nginx源码以及相关依赖源码包
+    wget http://172.17.0.1:8000/nginx-1.12.1.tar.gz && \
+    wget http://172.17.0.1:8000/nginx_upstream_check_module.tar.gz && \
+    wget http://172.17.0.1:8000/openssl-1.0.2l.tar.gz && \
+    wget http://172.17.0.1:8000/pcre-8.41.tar.gz && \
+    tar -zxC /usr/src -f nginx-1.12.1.tar.gz && \
+    tar -zxC /usr/src -f nginx_upstream_check_module.tar.gz && \
+    tar -zxC /usr/src -f openssl-1.0.2l.tar.gz && \
+    tar -zxC /usr/src -f pcre-8.41.tar.gz && \
+    rm nginx-1.12.1.tar.gz nginx_upstream_check_module.tar.gz openssl-1.0.2l.tar.gz pcre-8.41.tar.gz && \
+    cd /usr/src/nginx-1.12.1/src && \
+    patch -p1 < /usr/src/nginx_upstream_check_module/check_1.11.5\+.patch && \
+    cd .. && \
+    ./configure --prefix=/usr/local/nginx \
+    --conf-path=/usr/local/nginx/conf/nginx.conf \
+    --user=nobody \
+    --http-client-body-temp-path=/usr/local/nginx/cache/client_temp \
+    --http-proxy-temp-path=/usr/local/nginx/cache/proxy_temp \
+    --http-fastcgi-temp-path=/usr/local/nginx/cache/fastcgi_temp \
+    --http-uwsgi-temp-path=/usr/local/nginx/cache/uwsgi_temp \
+    --http-scgi-temp-path=/usr/local/nginx/cache/scgi_temp \
+    --with-http_ssl_module \
+    --with-http_realip_module \
+    --with-http_addition_module \
+    --with-http_sub_module \
+    --with-http_dav_module \
+    --with-http_flv_module \
+    --with-http_mp4_module \
+    --with-http_gunzip_module \
+    --with-http_gzip_static_module \
+    --with-http_geoip_module \
+    --with-http_random_index_module \
+    --with-http_secure_link_module \
+    --with-http_stub_status_module \
+    --with-http_v2_module \
+    --with-http_auth_request_module \
+    --with-poll_module \
+    --with-openssl=../openssl-1.0.2l \
+    --with-mail \
+    --with-stream \
+    --with-stream_ssl_module \
+    --with-stream_ssl_preread_module \
+    --with-stream_realip_module \
+    --with-mail_ssl_module \
+    --with-file-aio \
+    --with-pcre=../pcre-8.41 \
+    --add-module=../nginx_upstream_check_module && \
+    make -j$(getconf _NPROCESSORS_ONLN) && make install && \
+    mkdir /usr/local/nginx/cache && \
+    runDeps=$( \
+        scanelf --needed --nobanner --recursive /usr/local/nginx \
+        | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+        | sort -u \
+        | xargs -r apk info --installed \
+        | sort -u \
+    ) && \
+    apk add --no-cache --virtual .nginx-rundeps $runDeps && \
+    strip /usr/local/nginx/sbin/nginx* && \
+    apk del .build-deps && \
+    rm -fr /usr/src/*
+
+COPY nginx.conf /usr/local/nginx/conf/nginx.conf
+COPY default.conf /usr/local/nginx/conf/conf.d/default.conf
+
+EXPOSE 80 443
+
+CMD ["/usr/local/nginx/sbin/nginx", "-g", "daemon off;"]

@@ -1,0 +1,12 @@
+FROM alpine:latest
+
+MAINTAINER Yvan "me@yvanz.com"
+
+ENV MIRROR_URL http://mirrors.aliyun.com/alpine/
+
+RUN echo '' > /etc/apk/repositories && \
+    echo "${MIRROR_URL}latest-stable//main"     >> /etc/apk/repositories && \
+    echo "${MIRROR_URL}latest-stable//community" >> /etc/apk/repositories && \
+    mkdir /usr/src
+
+CMD ["/bin/sh"]

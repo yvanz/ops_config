@@ -1,0 +1,55 @@
+FROM alpine:latest
+
+MAINTAINER Yvan "me@yvanz.com"
+
+RUN apk add --no-cache --virtual .build-deps \
+    gcc \
+    make \
+    libc-dev \
+    zlib-dev \
+    libpng-dev \
+    linux-headers \
+    g++ \
+    curl-dev \
+    openssl-dev \
+    libxml2-dev \
+    && \
+    wget http://172.17.0.1:8000/php-5.4.42.tar.gz && \
+    tar -zxC /usr/src -f php-5.4.42.tar.gz && \
+    rm php-5.4.42.tar.gz && \
+    cd /usr/src/php-5.4.42 && \
+    ./configure --prefix=/usr/local/php \
+    --with-config-file-path=/usr/local/php/etc \
+    --with-curl \
+    --with-pdo-mysql=mysqlnd \
+    --enable-mbstring \
+    --with-mysqli=mysqlnd \
+    --with-mysql=mysqlnd \
+    --enable-mysqlnd \
+    --enable-xml \
+    --enable-fpm \
+    --with-gd \
+    --enable-gd-native-ttf \
+    --with-openssl \
+    --enable-zip \
+    --enable-ftp \
+    --with-zlib && \
+    make -j$(getconf _NPROCESSORS_ONLN) && make install && \
+    runDeps=$( \
+        scanelf --needed --nobanner --recursive /usr/local/php \
+        | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+        | sort -u \
+        | xargs -r apk info --installed \
+        | sort -u \
+    ) && \
+    strip_bin=$(scanelf --needed --nobanner --recursive /usr/local/php | awk '{print $NF}') && \
+    apk add --no-cache --virtual .php-rundeps $runDeps && \
+    strip $strip_bin && \
+    apk del .build-deps && \
+    rm -fr /usr/src/*
+
+COPY php-fpm.conf /usr/local/php/etc/php-fpm.conf
+
+EXPOSE 9000
+
+CMD ["/usr/local/php/sbin/php-fpm"]
