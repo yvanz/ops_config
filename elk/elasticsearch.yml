@@ -1,0 +1,29 @@
+# ======================== Elasticsearch Configuration =========================
+
+# ---------------------------------- Cluster -----------------------------------
+
+cluster.name: my-es
+
+# ------------------------------------ Node ------------------------------------
+
+node.name: es-1
+node.attr.rack: r1
+
+# ----------------------------------- Paths ------------------------------------
+
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+
+# ----------------------------------- Memory -----------------------------------
+
+bootstrap.memory_lock: true
+
+# ---------------------------------- Network -----------------------------------
+
+network.host: _eth0:ipv4_
+http.port: 9200
+
+# --------------------------------- Discovery ----------------------------------
+
+discovery.zen.ping.unicast.hosts: ["192.168.1.2", "192.168.1.3"]
+discovery.zen.minimum_master_nodes: 2

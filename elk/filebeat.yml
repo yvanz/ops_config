@@ -1,0 +1,52 @@
+######################## Filebeat Configuration ############################
+
+#=========================== Filebeat prospectors =============================
+
+filebeat.prospectors:
+
+#------------------------------ Log prospector --------------------------------
+- input_type: log
+  paths:
+    - /usr/logs/nginx/access_*
+  fields:
+    log-type: nginx-access
+  fields_under_root: true
+  exclude_files: [".gz$"]
+  scan_frequency: 5s
+
+- input_type: log
+  paths:
+    - /usr/logs/nginx/www.slow.log
+  fields:
+    log-type: php-slow
+  fields_under_root: true
+  multiline.pattern: ^\[%{MONTHDAY}-%{MONTH}-%{YEAR} %{TIME}\]
+  multiline.negate: true
+  multiline.match: after
+  exclude_files: [".gz$"]
+  scan_frequency: 5s
+
+#================================ General =====================================
+
+name: filebeat
+tags: ["HOSTIP"]
+
+#================================ Outputs =====================================
+
+#------------------------------- Redis output ----------------------------------
+output.redis:
+  enabled: true
+  hosts: ["ip:6379"]
+  key: filebeat
+  datatype: list
+  password: foobar
+
+#================================ Logging =====================================
+
+logging.level: error
+logging.to_files: true
+logging.files:
+  path: /usr/logs/logstash
+  name: filebeat.log
+  rotateeverybytes: 104857600 # = 100MB
+  keepfiles: 7
