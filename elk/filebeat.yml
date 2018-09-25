@@ -5,7 +5,7 @@
 filebeat.prospectors:
 
 #------------------------------ Log prospector --------------------------------
-- input_type: log
+- type: log
   paths:
     - /usr/logs/nginx/access_*
   fields:
@@ -14,7 +14,7 @@ filebeat.prospectors:
   exclude_files: [".gz$"]
   scan_frequency: 5s
 
-- input_type: log
+- type: log
   paths:
     - /usr/logs/nginx/www.slow.log
   fields:
