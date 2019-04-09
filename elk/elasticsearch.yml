@@ -7,7 +7,31 @@ cluster.name: my-es
 # ------------------------------------ Node ------------------------------------
 
 node.name: es-1
-node.attr.rack: r1
+node.master: true
+node.data: true
+node.ingest: false
+node.ml: false
+node.attr.box_type: stale
+node.attr.rack_id: Stale-1
+
+indices.recovery.max_bytes_per_sec: 2000mb
+indices.memory.index_buffer_size: 30%
+indices.fielddata.cache.size: 30%
+indices.breaker.fielddata.limit: 35%
+indices.breaker.request.limit: 20%
+indices.breaker.total.limit: 55%
+
+cluster.routing.allocation.same_shard.host: true
+cluster.routing.allocation.awareness.attributes: rack_id
+cluster.routing.allocation.balance.threshold: 1.1f
+cluster.routing.allocation.cluster_concurrent_rebalance: 3
+cluster.routing.allocation.node_initial_primaries_recoveries: 10
+cluster.routing.allocation.node_concurrent_recoveries: 10
+cluster.info.update.interval: 3m
+
+thread_pool.search.queue_size: 1000
+thread_pool.analyze.queue_size: 200
+thread_pool.write.queue_size: 500
 
 # ----------------------------------- Paths ------------------------------------
 
@@ -22,8 +46,16 @@ bootstrap.memory_lock: true
 
 network.host: _eth0:ipv4_
 http.port: 9200
+transport.tcp.port: 9300
 
 # --------------------------------- Discovery ----------------------------------
 
 discovery.zen.ping.unicast.hosts: ["192.168.1.2", "192.168.1.3"]
 discovery.zen.minimum_master_nodes: 2
+discovery.zen.ping_timeout: 10s
+
+gateway.recover_after_nodes: 8
+gateway.expected_nodes: 9
+gateway.recover_after_time: 10m
+
+action.destructive_requires_name: true
